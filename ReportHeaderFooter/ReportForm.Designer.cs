@@ -68,7 +68,7 @@
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(883, 566);
+            tabControl1.Size = new Size(983, 561);
             tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -81,7 +81,7 @@
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(875, 633);
+            tabPage1.Size = new Size(975, 533);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Process";
             tabPage1.UseVisualStyleBackColor = true;
@@ -94,7 +94,7 @@
             groupBox1.Controls.Add(lstOutputFiles);
             groupBox1.Location = new Point(8, 80);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(860, 545);
+            groupBox1.Size = new Size(960, 447);
             groupBox1.TabIndex = 8;
             groupBox1.TabStop = false;
             groupBox1.Text = "Processing";
@@ -104,9 +104,9 @@
             groupBox2.Controls.Add(lstDoneFiles);
             groupBox2.Controls.Add(lstErrorFiles);
             groupBox2.Dock = DockStyle.Right;
-            groupBox2.Location = new Point(657, 19);
+            groupBox2.Location = new Point(757, 19);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(200, 523);
+            groupBox2.Size = new Size(200, 425);
             groupBox2.TabIndex = 8;
             groupBox2.TabStop = false;
             groupBox2.Text = "Originals";
@@ -119,7 +119,7 @@
             lstDoneFiles.ItemHeight = 15;
             lstDoneFiles.Location = new Point(3, 19);
             lstDoneFiles.Name = "lstDoneFiles";
-            lstDoneFiles.Size = new Size(194, 319);
+            lstDoneFiles.Size = new Size(194, 214);
             lstDoneFiles.TabIndex = 6;
             // 
             // lstErrorFiles
@@ -128,7 +128,7 @@
             lstErrorFiles.BackColor = Color.FromArgb(255, 192, 192);
             lstErrorFiles.FormattingEnabled = true;
             lstErrorFiles.ItemHeight = 15;
-            lstErrorFiles.Location = new Point(3, 351);
+            lstErrorFiles.Location = new Point(3, 253);
             lstErrorFiles.Name = "lstErrorFiles";
             lstErrorFiles.Size = new Size(194, 169);
             lstErrorFiles.TabIndex = 7;
@@ -140,7 +140,7 @@
             lstReadyFiles.ItemHeight = 15;
             lstReadyFiles.Location = new Point(3, 19);
             lstReadyFiles.Name = "lstReadyFiles";
-            lstReadyFiles.Size = new Size(229, 523);
+            lstReadyFiles.Size = new Size(229, 425);
             lstReadyFiles.TabIndex = 4;
             // 
             // lstOutputFiles
@@ -151,7 +151,7 @@
             lstOutputFiles.ItemHeight = 15;
             lstOutputFiles.Location = new Point(238, 19);
             lstOutputFiles.Name = "lstOutputFiles";
-            lstOutputFiles.Size = new Size(416, 514);
+            lstOutputFiles.Size = new Size(516, 424);
             lstOutputFiles.TabIndex = 5;
             // 
             // btnStart
@@ -169,7 +169,7 @@
             // btnBrowseReadyFolder
             // 
             btnBrowseReadyFolder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnBrowseReadyFolder.Location = new Point(793, 6);
+            btnBrowseReadyFolder.Location = new Point(893, 6);
             btnBrowseReadyFolder.Name = "btnBrowseReadyFolder";
             btnBrowseReadyFolder.Size = new Size(75, 23);
             btnBrowseReadyFolder.TabIndex = 2;
@@ -182,7 +182,7 @@
             txtReadyFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtReadyFolder.Location = new Point(92, 6);
             txtReadyFolder.Name = "txtReadyFolder";
-            txtReadyFolder.Size = new Size(690, 23);
+            txtReadyFolder.Size = new Size(790, 23);
             txtReadyFolder.TabIndex = 1;
             // 
             // label1
@@ -314,7 +314,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(884, 566);
+            ClientSize = new Size(984, 561);
             Controls.Add(tabControl1);
             Name = "ReportForm";
             StartPosition = FormStartPosition.CenterScreen;

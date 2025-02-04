@@ -4,6 +4,16 @@ using PdfSharp.Pdf;
 
 namespace ReportHeaderFooter
 {
+    internal class FileListEvemtArgs : EventArgs
+    {
+        public string[] Files { get; set; }
+
+        public FileListEvemtArgs(string[] files)
+        {
+            Files = files;
+        }
+    }
+
     internal class ProcessEventArgs : EventArgs
     {
         public string PdfFileName { get; set; }
@@ -28,6 +38,10 @@ namespace ReportHeaderFooter
 
         #region Events
 
+        public delegate void ListFilesHandler(object sender, FileListEvemtArgs e);
+
+        public event ListFilesHandler? ListFiles;
+
         public delegate void ProcessingHandler(object sender, ProcessEventArgs e);
 
         public event ProcessingHandler? Processing;
@@ -35,6 +49,12 @@ namespace ReportHeaderFooter
         public delegate void ProcessedHandler(object sender, ProcessEventArgs e);
 
         public event ProcessedHandler? Processed;
+
+        protected virtual void OnFileListing(string[] files)
+        {
+            FileListEvemtArgs e = new FileListEvemtArgs(files);
+            ListFiles?.Invoke(this, e);
+        }
 
         protected virtual void OnProcessing(string pdfFileName)
         {
@@ -70,20 +90,25 @@ namespace ReportHeaderFooter
         public void StartProcess()
         {
             string[] readyFiles = Directory.GetFiles(_readyFolder, "*.pdf");
+            OnFileListing(readyFiles);
             foreach (string inputPdfFile in readyFiles)
             {
                 string inputFileName = Path.GetFileName(inputPdfFile);
-                string outputFileName = Path.Combine(_outputFolder, inputFileName);
+                string outputFileName = GetOutFileName(_doneFolder, inputFileName);
+
+                string outputFilePath = Path.Combine(_outputFolder, outputFileName);
+                string doneFilePath = Path.Combine(_doneFolder, outputFileName);
+                string errorFilePath = Path.Combine(_errorFolder, outputFileName);
                 try
                 {
                     OnProcessing(inputPdfFile);
-                    AddImageToPdf(inputPdfFile, outputFileName, _headerImagePath, _footerImagePath, 0, 0, 595, 50);
-                    File.Move(inputPdfFile, GetOutFileName(_doneFolder, inputFileName), false);
+                    AddImageToPdf(inputPdfFile, outputFilePath, _headerImagePath, _footerImagePath, 0, 0, 595, 50);
+                    File.Move(inputPdfFile, doneFilePath, false);
                     OnProcessed(inputPdfFile, "Done");
                 }
                 catch (Exception)
                 {
-                    File.Move(inputPdfFile, GetOutFileName(_errorFolder, inputFileName), true);   // overwrite file exists, if error
+                    File.Move(inputPdfFile, errorFilePath, true);   // overwrite file exists, if error
                     OnProcessed(inputPdfFile, "Error");
                 }
             }
@@ -98,7 +123,7 @@ namespace ReportHeaderFooter
         {
             string baseFilename = Path.GetFileNameWithoutExtension(fileName);
             var files = Directory.GetFiles(path, $"{baseFilename}*.pdf");
-            return Path.Combine(path, files.Length == 0 ? fileName : $"{baseFilename}_{files.Length}.pdf");
+            return files.Length == 0 ? fileName : $"{baseFilename}_{files.Length}.pdf";
         }
 
         private static void AddImageToPdf(string existingPdfPath, string outputPdfPath,
@@ -127,9 +152,9 @@ namespace ReportHeaderFooter
                 }
             }
             // Save the modified document
-            string outputFolder = Path.GetDirectoryName(outputPdfPath)!;
-            string outputFileName = Path.GetFileName(outputPdfPath);
-            document.Save(GetOutFileName(outputFolder, outputFileName));
+            //string outputFolder = Path.GetDirectoryName(outputPdfPath)!;
+            //string outputFileName = Path.GetFileName(outputPdfPath);
+            document.Save(outputPdfPath);    // GetOutFileName(outputFolder, outputFileName)
         }
     }
 }

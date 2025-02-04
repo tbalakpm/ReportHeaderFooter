@@ -4,7 +4,7 @@ namespace ReportHeaderFooter
 {
     public partial class ReportForm : Form
     {
-        private HeaderFooterImage _headerFooterImage;
+        private HeaderFooterImage? _headerFooterImage;
 
         public ReportForm()
         {
@@ -29,7 +29,41 @@ namespace ReportHeaderFooter
         private void StartProcess()
         {
             _headerFooterImage = new HeaderFooterImage(txtReadyFolder.Text, txtHeaderImageFile.Text, txtFooterImageFile.Text);
+            _headerFooterImage.ListFiles += HeaderFooterImage_ListFiles;
+            ///_headerFooterImage.Processing += HeaderFooterImage_Processing;
+            _headerFooterImage.Processed += HeaderFooterImage_Processed;
+
             _headerFooterImage.StartProcess();
+        }
+
+        private void HeaderFooterImage_ListFiles(object sender, FileListEvemtArgs e)
+        {
+            lstReadyFiles.Items.Clear();
+            lstReadyFiles.Items.AddRange(e.Files);
+            Application.DoEvents();
+        }
+
+        ////private void HeaderFooterImage_Processing(object sender, ProcessEventArgs e)
+        ////{
+        ////    throw new NotImplementedException();
+        ////}
+
+        private void HeaderFooterImage_Processed(object sender, ProcessEventArgs e)
+        {
+            switch (e.Status)
+            {
+                case "Done":
+                    lstReadyFiles.Items.Remove(e.PdfFileName);
+                    lstOutputFiles.Items.Add(e.PdfFileName);
+                    lstDoneFiles.Items.Add(e.PdfFileName);
+                    break;
+
+                case "Error":
+                    lstReadyFiles.Items.Remove(e.PdfFileName);
+                    lstErrorFiles.Items.Add(e.PdfFileName);
+                    break;
+            }
+            Application.DoEvents();
         }
 
         #region Settings - Save
