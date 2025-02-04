@@ -6,12 +6,12 @@ namespace ReportHeaderFooter
 {
     internal class ProcessEventArgs : EventArgs
     {
-        public string PdfFilename { get; set; }
+        public string PdfFileName { get; set; }
         public string Status { get; set; }
 
-        public ProcessEventArgs(string pdfFilename, string status)
+        public ProcessEventArgs(string pdfFileName, string status)
         {
-            this.PdfFilename = pdfFilename;
+            this.PdfFileName = pdfFileName;
             this.Status = status;
         }
     }
@@ -36,15 +36,15 @@ namespace ReportHeaderFooter
 
         public event ProcessedHandler? Processed;
 
-        protected virtual void OnProcessing(string pdfFilename)
+        protected virtual void OnProcessing(string pdfFileName)
         {
-            ProcessEventArgs e = new ProcessEventArgs(pdfFilename, "Processing");
+            ProcessEventArgs e = new ProcessEventArgs(pdfFileName, "Processing");
             Processing?.Invoke(this, e);
         }
 
-        protected virtual void OnProcessed(string pdfFilename, string status)
+        protected virtual void OnProcessed(string pdfFileName, string status)
         {
-            ProcessEventArgs e = new ProcessEventArgs(pdfFilename, status);
+            ProcessEventArgs e = new ProcessEventArgs(pdfFileName, status);
             Processed?.Invoke(this, e);
         }
 
@@ -72,19 +72,18 @@ namespace ReportHeaderFooter
             string[] readyFiles = Directory.GetFiles(_readyFolder, "*.pdf");
             foreach (string inputPdfFile in readyFiles)
             {
-                string outputFilename = Path.Combine(_outputFolder, Path.GetFileName(inputPdfFile));
-                string doneFilename = Path.Combine(_doneFolder, Path.GetFileName(inputPdfFile));
-                string errorFilename = Path.Combine(_errorFolder, Path.GetFileName(inputPdfFile));
+                string inputFileName = Path.GetFileName(inputPdfFile);
+                string outputFileName = Path.Combine(_outputFolder, inputFileName);
                 try
                 {
                     OnProcessing(inputPdfFile);
-                    AddImageToPdf(inputPdfFile, outputFilename, _headerImagePath, _footerImagePath, 0, 0, 595, 50);
-                    File.Move(inputPdfFile, doneFilename, false);
+                    AddImageToPdf(inputPdfFile, outputFileName, _headerImagePath, _footerImagePath, 0, 0, 595, 50);
+                    File.Move(inputPdfFile, GetOutFileName(_doneFolder, inputFileName), false);
                     OnProcessed(inputPdfFile, "Done");
                 }
                 catch (Exception)
                 {
-                    File.Move(inputPdfFile, errorFilename, false);
+                    File.Move(inputPdfFile, GetOutFileName(_errorFolder, inputFileName), true);   // overwrite file exists, if error
                     OnProcessed(inputPdfFile, "Error");
                 }
             }
@@ -95,6 +94,13 @@ namespace ReportHeaderFooter
             return Path.GetDirectoryName(readyPath)!;
         }
 
+        private static string GetOutFileName(string path, string fileName)
+        {
+            string baseFilename = Path.GetFileNameWithoutExtension(fileName);
+            var files = Directory.GetFiles(path, $"{baseFilename}*.pdf");
+            return Path.Combine(path, files.Length == 0 ? fileName : $"{baseFilename}_{files.Length}.pdf");
+        }
+
         private static void AddImageToPdf(string existingPdfPath, string outputPdfPath,
             string headerImagePath, string footerImagePath,
             double x, double y, double width, double height)
@@ -102,26 +108,28 @@ namespace ReportHeaderFooter
             // Open the existing PDF
             PdfDocument document = PdfReader.Open(existingPdfPath, PdfDocumentOpenMode.Modify);
 
-            // Select the first page
-            PdfPage page = document.Pages[0];
+            // Load the header image
+            XImage headerImage = XImage.FromFile(headerImagePath);
+            // Load the footer image
+            XImage footerImage = XImage.FromFile(footerImagePath);
 
-            // Create a graphics object for drawing
-            using (XGraphics gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append))
+            // Iterate through all pages
+            foreach (PdfPage page in document.Pages)
             {
-                // Load the header image
-                XImage headerImage = XImage.FromFile(headerImagePath);
+                // Create a graphics object for drawing
+                using (XGraphics gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append))
+                {
+                    // Header
+                    gfx.DrawImage(headerImage, x, y, width, height);
 
-                // Header
-                gfx.DrawImage(headerImage, x, y, width, height);
-
-                // Load the footer image
-                XImage footerImage = XImage.FromFile(footerImagePath);
-                // Draw the image at (x, y) with specified size
-                gfx.DrawImage(footerImage, x, page.Height.Point - y - height, width - 70, height);
+                    // Footer - Draw the image at (x, y) with specified size
+                    gfx.DrawImage(footerImage, x, page.Height.Point - y - height, width - 80, height);
+                }
             }
-
             // Save the modified document
-            document.Save(outputPdfPath);
+            string outputFolder = Path.GetDirectoryName(outputPdfPath)!;
+            string outputFileName = Path.GetFileName(outputPdfPath);
+            document.Save(GetOutFileName(outputFolder, outputFileName));
         }
     }
 }

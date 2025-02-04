@@ -1,5 +1,3 @@
-using ReportHeaderFooter.Properties;
-
 using System.Configuration;
 
 namespace ReportHeaderFooter
